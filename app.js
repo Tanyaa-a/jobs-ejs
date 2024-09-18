@@ -1,20 +1,13 @@
 const express = require("express");
 require("express-async-errors");
-require("dotenv").config(); // to load the .env file into the process.env object
-const session = require("express-session");
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: true,
-  })
-);
 
 const app = express();
 
 app.set("view engine", "ejs");
-// app.use(require("body-parser").urlencoded({ extended: true }));
+app.use(require("body-parser").urlencoded({ extended: true }));
 
+require("dotenv").config(); // to load the .env file into the process.env object
+const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
 const url = process.env.MONGO_URI;
 
@@ -43,7 +36,6 @@ if (app.get("env") === "production") {
 app.use(session(sessionParms));
 
 app.use(require("connect-flash")());
-
 // secret word handling
 app.get("/secretWord", (req, res) => {
     if (!req.session.secretWord) {
@@ -53,7 +45,8 @@ app.get("/secretWord", (req, res) => {
     res.locals.errors = req.flash("error");
     res.render("secretWord", { secretWord: req.session.secretWord });
   });
-  app.post("/secretWord", (req, res) => {
+
+app.post("/secretWord", (req, res) => {
     if (req.body.secretWord.toUpperCase()[0] == "P") {
       req.flash("error", "That word won't work!");
       req.flash("error", "You can't use words that start with p.");
@@ -62,7 +55,7 @@ app.get("/secretWord", (req, res) => {
       req.flash("info", "The secret word was changed.");
     }
     res.redirect("/secretWord");
-  });
+});
 
 app.use((req, res) => {
   res.status(404).send(`That page (${req.url}) was not found.`);
@@ -85,4 +78,4 @@ const start = async () => {
   }
 };
 
-start();
+start(); 
