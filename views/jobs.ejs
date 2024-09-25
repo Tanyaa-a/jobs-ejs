@@ -1,0 +1,52 @@
+<%- include("partials/head.ejs") %>
+    <%- include("partials/header.ejs") %>
+        <div style="text-align: center;">
+            <h2>Jobs List</h2>
+            <a href="/jobs/new" class="btn btn-primary mb-3"
+                style="background-color: blue; color: white; text-decoration:none; border:black">Add New Job</a>
+        </div>
+        <table id="jobs-table" class="table" style="margin-left: auto; margin-right: auto;">
+                <tr>
+                    <th>Company</th>
+                    <th>Position</th>
+                    <th>Status</th>
+                    <th class="px-6">Actions</th>
+                </tr>
+            <tbody>
+                <% if (jobs && jobs.length) { %>
+                    <% jobs.forEach((job)=> { %>
+                        <tr>
+                            <td>
+                                <%= job.company %>
+                            </td>
+                            <td>
+                                <%= job.position %>
+                            </td>
+                            <td>
+                                <%= job.status %>
+                            </td>
+                            <td class="text-end">
+                                <a href="/jobs/edit/<%= job.id %>" class="btn"
+                                    style="background-color: blue; color: white; text-decoration:none;">
+                                    Edit
+                                </a>
+                            </td>
+                            <td class="text-end">
+                                <form action="/jobs/delete/<%= job.id %>" method="POST" style="display:inline;">
+                                    <input type="hidden" name="_csrf" value="<%= _csrf %>">
+                                    <button type="submit" class="btn" style="background-color: red; color: white;">
+                                        Delete
+                                    </button>
+                                </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <% }) %>
+                            <% } else { %>
+                                <tr class="row-spacing">
+                                    <td colspan="5">No jobs found</td>
+                                </tr>
+                                <% } %>
+            </tbody>
+        </table>
+        <%- include("partials/footer.ejs") %>
