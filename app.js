@@ -1,3 +1,4 @@
+require("dotenv").config(); 
 const express = require("express");
 require("express-async-errors");
 const csrf = require('host-csrf'); 
@@ -8,8 +9,12 @@ const auth = require('./middleware/auth');
 app.set("view engine", "ejs");
 app.use(require("body-parser").urlencoded({ extended: true }));
 
-require("dotenv").config(); 
 
+
+let mongoURL = process.env.MONGO_URI;
+if (process.env.NODE_ENV == "test") {
+  mongoURL = process.env.MONGO_URI_TEST;
+}
 // Cookie parser to sign cookies with the SESSION_SECRET
 const cookieParser = require('cookie-parser');
 app.use(cookieParser(process.env.SESSION_SECRET));
@@ -17,10 +22,11 @@ const session = require("express-session");
 const jobs = require('./routes/jobs');
 const Job = require('./models/Job');
 const MongoDBStore = require("connect-mongodb-session")(session);
-const url = process.env.MONGO_URI;
+
+
 
 const store = new MongoDBStore({
-  uri: url,
+  uri: mongoURL,
   collection: "mySessions",
 });
 store.on("error", function (error) {
@@ -64,13 +70,34 @@ app.use(passport.session());
 app.use(require("connect-flash")());
 app.use(require("./middleware/storeLocals"));
 
+//Content-Type header middleware
+app.use((req, res, next) => {
+  if (req.path == "/multiply") {
+    res.set("Content-Type", "application/json");
+  } else {
+    res.set("Content-Type", "text/html");
+  }
+  next();
+});
+
 // Routes
 app.get("/", (req, res) => {
   res.render("index");
 });
 app.use("/sessions", require("./routes/sessionRoutes"));
-app.use("/secretWord", require("./routes/secretWord")); // Secret word handling route
+app.use("/secretWord", require("./routes/secretWord")); 
 app.use("/jobs", jobs);
+
+//testing for API
+app.get("/multiply", (req, res) => {
+  const result = req.query.first * req.query.second;
+  if (result.isNaN) {
+    result = "NaN";
+  } else if (result == null) {
+    result = "null";
+  }
+  res.json({ result: result });
+});
 
 // 404 error handling
 app.use((req, res) => {
@@ -85,11 +112,11 @@ app.use((err, req, res, next) => {
 
 const port = process.env.PORT || 3000;
 
-const start = async () => {
+const start = () => {
   try {
-    await require("./db/connect")(process.env.MONGO_URI);
-    app.listen(port, () =>
-      console.log(`Server is listening on port ${port}...`)
+    require("./db/connect")(mongoURL);
+    return app.listen(port, () =>
+      console.log(`Server is listening on port ${port}...`),
     );
   } catch (error) {
     console.log(error);
@@ -97,3 +124,5 @@ const start = async () => {
 };
 
 start();
+
+module.exports = { app };

@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha test/*.js --timeout 5000 --exit"
   },
   "author": "",
   "license": "ISC",
@@ -31,6 +31,12 @@
     "xss-clean": "^0.1.4"
   },
   "devDependencies": {
-    "nodemon": "^3.1.4"
+    "@faker-js/faker": "^9.0.3",
+    "chai": "^5.1.1",
+    "chai-http": "^5.0.0",
+    "factory-bot": "^6.3.1",
+    "mocha": "^10.7.3",
+    "nodemon": "^3.1.4",
+    "puppeteer": "^23.4.1"
   }
 }
