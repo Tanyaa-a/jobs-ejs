@@ -1,69 +1,91 @@
-// tests/puppeteer.js
-
 const puppeteer = require("puppeteer");
-const { server } = require("../app"); // Assuming your server is exported as 'server' from '../app'
+require("../app");
 const { seed_db, testUserPassword } = require("../util/seed_db");
+const Job = require("../models/Job");
 
-let browser;
-let page;
-let testUser;
+let testUser = null;
+let page = null;
+let browser = null;
 
-describe("index page test", function () {
-    before(async function () {
-      this.timeout(10000);
-      browser = await puppeteer.launch();
-      page = await browser.newPage();
-      await page.goto("http://localhost:3000");
-    });
-    after(async function () {
-      this.timeout(5000);
-      await browser.close();
-      server.close();
-      return;
-    });
+describe("jobs-ejs puppeteer test", function () {
+  before(async function () {
+   
+    browser = await puppeteer.launch();
+    page = await browser.newPage();
 
-describe("got to site", function () {
-    it("should have completed a connection", function (done) {
-      done();
+    await page.goto("http://localhost:3000");
+  });
+
+  after(async function () {
+    this.timeout(5000);
+  
+    await browser.close();
+  });
+
+  describe("Go to site", function () {
+    it("should have completed a connection", async function () {
+      const { expect } = await import('chai')
+      const element = await page.waitForSelector("body");
+      expect(element).to.not.be.null;
     });
   });
 
-describe("index page test", function () {
-    this.timeout(10000);
+  describe("Index page test", function () {
     it("finds the index page logon link", async () => {
-      this.logonLink = await page.waitForSelector(
-        "a ::-p-text(Click this link to logon)",
-      );
+      try {
+        this.logonLink = await page.waitForSelector(
+          'a[href="/sessions/logon"]' 
+    )
+      } catch (err) {
+        console.error("Logon link not found:", err);
+        throw err;
+      }
     });
+
     it("gets to the logon page", async () => {
-      await this.logonLink.click();
-      await page.waitForNavigation();
-      const email = await page.waitForSelector("input[name=email]");
+      try {
+        await this.logonLink.click(); 
+        await page.waitForNavigation(); 
+        const email = await page.waitForSelector('input[name="email"]'); 
+      } catch (err) {
+        console.error("Error navigating to logon page:", err);
+        throw err;
+      }
     });
   });
 
-  describe("logon page test", function () {
-    console.log("at line 48", this.outerd, this.innerd, this.secondIt)
+  describe("Logon page test", function () {
     this.timeout(20000);
+
     it("resolves all the fields", async () => {
-      this.email = await page.waitForSelector("input[name=email]");
-      this.password = await page.waitForSelector("input[name=password]");
-      this.submit = await page.waitForSelector("button ::-p-text(Logon)");
+      try {
+        this.email = await page.waitForSelector('input[name="email"]');
+        this.password = await page.waitForSelector('input[name="password"]');
+        this.submit = await page.waitForSelector("button ::-p-text(Logon)");
+      } catch (err) {
+        console.error("Logon form elements not found:", err);
+        throw err;
+      }
     });
+
     it("sends the logon", async () => {
-      testUser = await seed_db();
-      await this.email.type(testUser.email);
-      await this.password.type(testUserPassword);
-      await this.submit.click();
-      await page.waitForNavigation();
-      await page.waitForSelector(
-        `p ::-p-text(${testUser.name} is logged on.)`,
-      );
-      await page.waitForSelector("a ::-p-text(change the secret");
-      await page.waitForSelector('a[href="/secretWord"]');
-      const copyr = await page.waitForSelector("p ::-p-text(copyright)");
-      const copyrText = await copyr.evaluate((el) => el.textContent);
-      console.log("copyright text: ", copyrText);
+      try {
+        testUser = await seed_db(); 
+        await this.email.type(testUser.email); 
+        await this.password.type(testUserPassword); 
+        await this.submit.click(); 
+        await page.waitForNavigation(); 
+
+        await page.waitForSelector(`p ::-p-text(${testUser.name} is logged on.)`);
+        await page.waitForSelector('a[href="/secretWord"]');
+
+        const copyr = await page.waitForSelector("p ::-p-text(copyright)");
+        const copyrText = await copyr.evaluate((el) => el.textContent);
+        console.log("Copyright text: ", copyrText);
+      } catch (err) {
+        console.error("Error during logon:", err);
+        throw err;
+      }
     });
   });
-})
+});

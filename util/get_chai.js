@@ -6,7 +6,6 @@ const get_chai = async () => {
     const chaiHttp = await import("chai-http");
     const chai = use(chaiHttp.default);
     chai_obj = { expect: expect, request: chai.request };
-   
   }
   return chai_obj;
 };

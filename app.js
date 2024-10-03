@@ -4,17 +4,16 @@ require("express-async-errors");
 const csrf = require('host-csrf'); 
 const app = express();
 const auth = require('./middleware/auth'); 
+const xss = require('xss-clean');
 
 
 app.set("view engine", "ejs");
 app.use(require("body-parser").urlencoded({ extended: true }));
+app.use(xss());
 
 
 
-let mongoURL = process.env.MONGO_URI;
-if (process.env.NODE_ENV == "test") {
-  mongoURL = process.env.MONGO_URI_TEST;
-}
+
 // Cookie parser to sign cookies with the SESSION_SECRET
 const cookieParser = require('cookie-parser');
 app.use(cookieParser(process.env.SESSION_SECRET));
@@ -23,7 +22,10 @@ const jobs = require('./routes/jobs');
 const Job = require('./models/Job');
 const MongoDBStore = require("connect-mongodb-session")(session);
 
-
+let mongoURL = process.env.MONGO_URI;
+if (process.env.NODE_ENV == "test") {
+  mongoURL = process.env.MONGO_URI_TEST;
+}
 
 const store = new MongoDBStore({
   uri: mongoURL,
