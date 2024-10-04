@@ -1,9 +1,29 @@
+
 <%- include("partials/head.ejs") %>
 <%- include("partials/header.ejs") %>
-<% if (user) { %>
-    <a href="/secretWord">Click this link to view/change the secret word.</a>
-<% } else { %>
-    <a href="/sessions/logon">Click this link to logon.</a>
-    <a href="/sessions/register">Click this link to register.</a>
-<% } %>
+<div  class="d-flex flex-column align-items-center justify-content-center" style="width: 100%; height: 60vh;">
+  <% if (user) { %>
+      <a href="/secretWord" 
+        class="btn mt-3 w-60" 
+        style="background-color: #d1e7dd; color: #0c4128;">
+            Click this link to view/change the secret word.
+        </a>
+      <a href="/jobs" 
+        class="btn mt-3 w-60" 
+        style="background-color: #d1e7dd; color: #0c4128;">
+            Click this link to view jobs.
+        </a>
+  <% } else { %>
+    <a href="/sessions/logon" 
+    class="btn mt-3" 
+    style="background-color: #d1e7dd; color: #0c4128; width: 30%;">
+        Click this link to login.
+    </a>
+  <a href="/sessions/register" 
+    class="btn btn-secondary mt-3" 
+    style="width: 30%;">
+        Click this link to register.
+    </a>
+  <% } %>
+</div>
 <%- include("partials/footer.ejs") %>
